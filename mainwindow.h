@@ -16,7 +16,15 @@ public:
     ~MainWindow();
 
 private slots:
-    void on_pushButton_clicked();
+    void on_IPPathButton_clicked();
+
+    void on_IPBackupPathButton_clicked();
+
+    void on_HashBackupPathButton_clicked();
+
+    void on_HashBackupPathCopyButton_clicked();
+
+    void on_HashSavePathButton_clicked();
 
 private:
     Ui::MainWindow *ui;

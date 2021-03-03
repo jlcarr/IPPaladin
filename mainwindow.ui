@@ -15,22 +15,50 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
-    <item row="0" column="0">
-     <layout class="QVBoxLayout" name="verticalLayout_2">
+    <item row="0" column="1">
+     <layout class="QVBoxLayout" name="TopContainer">
       <item>
-       <widget class="QLabel" name="label">
+       <widget class="QLabel" name="Step1Label">
         <property name="text">
-         <string>backup</string>
+         <string>Step 1: backup</string>
         </property>
        </widget>
       </item>
       <item>
-       <layout class="QHBoxLayout" name="horizontalLayout">
+       <layout class="QHBoxLayout" name="IPPathContainer">
         <item>
-         <widget class="QLineEdit" name="backupPath"/>
+         <widget class="QLabel" name="IPPathlabel">
+          <property name="text">
+           <string>IP path:</string>
+          </property>
+         </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="backupBrowserButton">
+         <widget class="QLineEdit" name="IPPathInput"/>
+        </item>
+        <item>
+         <widget class="QPushButton" name="IPPathButton">
+          <property name="text">
+           <string>Browse</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="IPBackupPathContainer">
+        <item>
+         <widget class="QLabel" name="IPBackupPathLabel">
+          <property name="text">
+           <string>Backup path:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="IPBackupPathInput"/>
+        </item>
+        <item>
+         <widget class="QPushButton" name="IPBackupPathButton">
           <property name="text">
            <string>Browse</string>
           </property>
@@ -43,26 +71,112 @@
         <property name="text">
          <string>compress data (recommended)</string>
         </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="label_2">
-        <property name="text">
-         <string>hash</string>
+        <property name="checked">
+         <bool>true</bool>
         </property>
        </widget>
       </item>
       <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_2">
+       <layout class="QHBoxLayout" name="BackupContainer">
         <item>
-         <widget class="QLineEdit" name="lineEdit"/>
+         <widget class="QPushButton" name="BackupButton">
+          <property name="text">
+           <string>Backup</string>
+          </property>
+         </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="pushButton">
+         <spacer name="horizontalSpacer">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <widget class="QLabel" name="Step2Label">
+        <property name="text">
+         <string>Step 2: hash</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="HashBackupPathContainer">
+        <item>
+         <widget class="QLabel" name="HashBackupPathLabel">
+          <property name="text">
+           <string>Backup path:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="HashBackupPathInput"/>
+        </item>
+        <item>
+         <widget class="QPushButton" name="HashBackupPathButton">
           <property name="text">
            <string>Browse</string>
           </property>
          </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="HashBackupPathCopyButton">
+          <property name="text">
+           <string>Copy Step 1</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="HashSavePathContainer">
+        <item>
+         <widget class="QLabel" name="HashSavePathLabel">
+          <property name="text">
+           <string>Hash save path:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="HashSavePathInput"/>
+        </item>
+        <item>
+         <widget class="QPushButton" name="HashSavePathButton">
+          <property name="text">
+           <string>Browse</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="HashContainer">
+        <item>
+         <widget class="QPushButton" name="HashButton">
+          <property name="text">
+           <string>Hash</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer_2">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
         </item>
        </layout>
       </item>
