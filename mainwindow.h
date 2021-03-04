@@ -26,6 +26,8 @@ private slots:
 
     void on_HashSavePathButton_clicked();
 
+    void on_BackupButton_clicked();
+
 private:
     Ui::MainWindow *ui;
 };
