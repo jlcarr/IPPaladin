@@ -7,6 +7,8 @@
 #include <QDir>
 #include <QFileDevice>
 
+#include <openssl/sha.h>
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
@@ -44,7 +46,11 @@ void copyDirectory(QString source, QString destination, bool lock = true)
     }
 }
 
-
+QByteArray cryptoHash(QByteArray data){
+    SHA512_CTX hash;
+    SHA512_Init(&hash);
+    return data;
+}
 
 void MainWindow::on_IPPathButton_clicked()
 {

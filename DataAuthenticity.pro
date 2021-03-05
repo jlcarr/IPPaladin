@@ -18,6 +18,12 @@ HEADERS += \
 FORMS += \
     mainwindow.ui
 
+INCLUDEPATH += \
+    /usr/local/opt/openssl/include
+
+LIBS += \
+    /usr/local/opt/openssl/lib/libcrypto.a
+
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
