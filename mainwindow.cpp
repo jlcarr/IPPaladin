@@ -21,6 +21,14 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+/**
+ * @brief copyDirectory
+ * @param source
+ * @param destination
+ * @param lock
+ * A function for recursively copying a directory from the source into the destination.
+ * The copied data may be locked from editing to preserve its integrity.
+ */
 void copyDirectory(QString source, QString destination, bool lock = true)
 {
     QDir sourceDirectory(source);
@@ -46,10 +54,39 @@ void copyDirectory(QString source, QString destination, bool lock = true)
     }
 }
 
-QByteArray cryptoHash(QByteArray data){
+/**
+ * @brief cryptoHash
+ * @param data
+ * @return
+ * A function for computing the cryptographic hash of a function.
+ * Uses OpenSSL's implementation of the SHA512 hashing algorithm.
+ */
+QByteArray cryptoHash(QString file_name)
+{
+    const int buffer_size = 1024*1024;
+    QByteArray returnHash(SHA512_DIGEST_LENGTH, (unsigned char) 0);
     SHA512_CTX hash;
-    SHA512_Init(&hash);
-    return data;
+    if(!SHA512_Init(&hash)) return returnHash;
+
+    QFile file(file_name);
+    if(file.open(QIODevice::ReadOnly)){
+            char buffer[buffer_size];
+
+            int remainingBytes = file.size();
+            int bytesRead;
+            int nextReadSize = qMin(remainingBytes, buffer_size);
+            while (nextReadSize > 0 && (bytesRead = file.read(buffer, nextReadSize)) > 0)
+            {
+                        qDebug("read bytes: %s", qPrintable(QByteArray(buffer).toHex()));
+                        remainingBytes -= bytesRead;
+                        if(!SHA512_Update(&hash, buffer, bytesRead)) return returnHash;
+                        nextReadSize = qMin(remainingBytes, buffer_size);
+            }
+            file.close();
+    }
+    if(!SHA512_Final((unsigned char*)returnHash.data(), &hash)) return returnHash;
+    qDebug("Hash value: %s", qPrintable(returnHash.toHex()));
+    return returnHash;
 }
 
 void MainWindow::on_IPPathButton_clicked()
@@ -95,4 +132,9 @@ void MainWindow::on_HashSavePathButton_clicked()
     qDebug("Hash Save Path: %s", qPrintable(file_name));
     if(!file_name.isEmpty())
         ui->HashSavePathInput->setText(file_name);
+}
+
+void MainWindow::on_HashButton_clicked()
+{
+    cryptoHash(ui->HashBackupPathInput->text());
 }

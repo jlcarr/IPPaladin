@@ -28,6 +28,8 @@ private slots:
 
     void on_BackupButton_clicked();
 
+    void on_HashButton_clicked();
+
 private:
     Ui::MainWindow *ui;
 };
