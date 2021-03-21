@@ -90,19 +90,20 @@ QByteArray hashFile(QString file_name)
     return returnHash;
 }
 
-void hashDirectory(QString path){
+void hashDirectory(QString path, QTextStream& hashOutput){
     QDir directory(path);
     if(!directory.exists()) return;
 
     foreach (QString subdirectory, directory.entryList(QDir::Dirs | QDir::NoDotAndDotDot)) {
         QString sub_path = path + QDir::separator() + subdirectory;
-        hashDirectory(sub_path);
+        hashDirectory(sub_path, hashOutput);
     }
 
     foreach (QString file, directory.entryList(QDir::Files)) {
         QString file_path = path + QDir::separator() + file;
         qDebug("file path: %s", qPrintable(file_path));
-        hashFile(file_path);
+        QByteArray hashValue = hashFile(file_path);
+        hashOutput << hashValue.toHex() << " " << file_path << "\n";
     }
 }
 
@@ -155,5 +156,12 @@ void MainWindow::on_HashSavePathButton_clicked()
 
 void MainWindow::on_HashButton_clicked()
 {
-    hashDirectory(ui->HashBackupPathInput->text());
+    QDir savePath(ui->HashSavePathInput->text());
+    QFile hashOutputFile(savePath.absoluteFilePath("test.txt"));
+    if (!hashOutputFile.open(QIODevice::WriteOnly | QIODevice::Text)) return;
+    QTextStream hashOutput(&hashOutputFile);
+
+    hashDirectory(ui->HashBackupPathInput->text(), hashOutput);
+    hashOutputFile.close();
+    hashOutputFile.setPermissions(QFileDevice::ReadOwner);
 }
