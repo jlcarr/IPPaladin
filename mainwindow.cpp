@@ -6,6 +6,7 @@
 #include <QFileDialog>
 #include <QDir>
 #include <QFileDevice>
+#include <QDate>
 
 #include <openssl/sha.h>
 
@@ -29,7 +30,7 @@ MainWindow::~MainWindow()
  * A function for recursively copying a directory from the source into the destination.
  * The copied data may be locked from editing to preserve its integrity.
  */
-void copyDirectory(QString source, QString destination, bool lock = true)
+void MainWindow::copyDirectory(QString source, QString destination, bool lock = true)
 {
     QDir sourceDirectory(source);
     if(!sourceDirectory.exists()) return;
@@ -40,6 +41,7 @@ void copyDirectory(QString source, QString destination, bool lock = true)
         qDebug("source directory path: %s", qPrintable(subSource_path));
         qDebug("destination directory path: %s", qPrintable(subDestination_path));
         sourceDirectory.mkpath(subDestination_path);
+        ui->uiConsole->appendPlainText("made directory: " + subDestination_path);
         copyDirectory(subSource_path, subDestination_path);
         //if(lock) QFile(subDestination_path).setPermissions(QFileDevice::ReadOwner);
     }
@@ -51,6 +53,7 @@ void copyDirectory(QString source, QString destination, bool lock = true)
         if(lock) QFile(destinationFile_path).setPermissions(QFileDevice::ReadOwner);
         qDebug("source file path: %s", qPrintable(sourceFile_path));
         qDebug("destination file path: %s", qPrintable(destinationFile_path));
+        ui->uiConsole->appendPlainText("copied file: " + destinationFile_path);
     }
 }
 
@@ -61,7 +64,7 @@ void copyDirectory(QString source, QString destination, bool lock = true)
  * A function for computing the cryptographic hash of a function.
  * Uses OpenSSL's implementation of the SHA512 hashing algorithm.
  */
-QByteArray hashFile(QString file_name)
+QByteArray MainWindow::hashFile(QString file_name)
 {
     const int buffer_size = 1024*1024;
     QByteArray returnHash(SHA256_DIGEST_LENGTH, (unsigned char) 0);
@@ -78,7 +81,7 @@ QByteArray hashFile(QString file_name)
         int nextReadSize = qMin(remainingBytes, buffer_size);
         while (nextReadSize > 0 && (bytesRead = file.read(buffer, nextReadSize)) > 0)
         {
-            qDebug("read bytes: %s", qPrintable(QByteArray(buffer, bytesRead).toHex()));
+            //qDebug("read bytes: %s", qPrintable(QByteArray(buffer, bytesRead).toHex()));
             remainingBytes -= bytesRead;
             if(!SHA256_Update(&hash, buffer, bytesRead)) return returnHash;
             nextReadSize = qMin(remainingBytes, buffer_size);
@@ -90,20 +93,21 @@ QByteArray hashFile(QString file_name)
     return returnHash;
 }
 
-void hashDirectory(QString path, QTextStream& hashOutput){
+void MainWindow::hashDirectory(QString path, QTextStream& hashOutput){
     QDir directory(path);
     if(!directory.exists()) return;
-
-    foreach (QString subdirectory, directory.entryList(QDir::Dirs | QDir::NoDotAndDotDot)) {
-        QString sub_path = path + QDir::separator() + subdirectory;
-        hashDirectory(sub_path, hashOutput);
-    }
 
     foreach (QString file, directory.entryList(QDir::Files)) {
         QString file_path = path + QDir::separator() + file;
         qDebug("file path: %s", qPrintable(file_path));
         QByteArray hashValue = hashFile(file_path);
         hashOutput << hashValue.toHex() << " " << file_path << "\n";
+        ui->uiConsole->appendPlainText("hashed: " + file_path);
+    }
+
+    foreach (QString subdirectory, directory.entryList(QDir::Dirs | QDir::NoDotAndDotDot)) {
+        QString sub_path = path + QDir::separator() + subdirectory;
+        MainWindow::hashDirectory(sub_path, hashOutput);
     }
 }
 
@@ -130,7 +134,9 @@ void MainWindow::on_IPBackupPathButton_clicked()
 void MainWindow::on_BackupButton_clicked()
 {
     qDebug("Backing up %s", qPrintable(ui->IPPathInput->text()));
+    ui->uiConsole->appendPlainText("Backing up data:");
     copyDirectory(ui->IPPathInput->text(), ui->IPBackupPathInput->text());
+    ui->uiConsole->appendPlainText("Done backing up data\n");
 }
 
 void MainWindow::on_HashBackupPathButton_clicked()
@@ -156,12 +162,18 @@ void MainWindow::on_HashSavePathButton_clicked()
 
 void MainWindow::on_HashButton_clicked()
 {
+    ui->uiConsole->appendPlainText("Hashing data:");
+    // Create the hash output file
     QDir savePath(ui->HashSavePathInput->text());
-    QFile hashOutputFile(savePath.absoluteFilePath("test.txt"));
+    QString currentDate = QDate::currentDate().toString("yyyy-MM-dd_hh-mm-ss");
+    QString fileName = "backup_hashes_" + currentDate + ".txt";
+    QFile hashOutputFile(savePath.absoluteFilePath(fileName));
     if (!hashOutputFile.open(QIODevice::WriteOnly | QIODevice::Text)) return;
     QTextStream hashOutput(&hashOutputFile);
 
-    hashDirectory(ui->HashBackupPathInput->text(), hashOutput);
+    MainWindow::hashDirectory(ui->HashBackupPathInput->text(), hashOutput);
+
     hashOutputFile.close();
     hashOutputFile.setPermissions(QFileDevice::ReadOwner);
+    ui->uiConsole->appendPlainText("Done hashing data");
 }

@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QTextStream>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -32,5 +33,8 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
+    void copyDirectory(QString source, QString destination, bool lock);
+    void hashDirectory(QString path, QTextStream& hashOutput);
+    QByteArray hashFile(QString file_name);
 };
 #endif // MAINWINDOW_H
