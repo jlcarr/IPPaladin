@@ -6,7 +6,7 @@
 #include <QFileDialog>
 #include <QDir>
 #include <QFileDevice>
-#include <QDate>
+#include <QDateTime>
 
 #include <openssl/sha.h>
 
@@ -88,6 +88,11 @@ QByteArray MainWindow::hashFile(QString file_name)
         }
         file.close();
     }
+    else
+    {
+        qDebug("Failed to open file: %s\n", qPrintable(file_name));
+        return returnHash;
+    }
     if(!SHA256_Final((unsigned char*)returnHash.data(), &hash)) return returnHash;
     qDebug("Hash value: %s\n", qPrintable(returnHash.toHex()));
     return returnHash;
@@ -165,15 +170,28 @@ void MainWindow::on_HashButton_clicked()
     ui->uiConsole->appendPlainText("Hashing data:");
     // Create the hash output file
     QDir savePath(ui->HashSavePathInput->text());
-    QString currentDate = QDate::currentDate().toString("yyyy-MM-dd_hh-mm-ss");
+    QString currentDate = QDateTime::currentDateTime().toString("yyyy-MM-dd_hh-mm-ss");
     QString fileName = "backup_hashes_" + currentDate + ".txt";
+    QFile hashBackupOutputFile(savePath.absoluteFilePath(fileName));
+    if (!hashBackupOutputFile.open(QIODevice::WriteOnly | QIODevice::Text)) return;
+    QTextStream hashBackupOutput(&hashBackupOutputFile);
+
+    MainWindow::hashDirectory(ui->HashBackupPathInput->text(), hashBackupOutput);
+
+    hashBackupOutputFile.close();
+    hashBackupOutputFile.setPermissions(QFileDevice::ReadOwner);
+    qDebug("Done hashing data");
+    ui->uiConsole->appendPlainText("Done hashing data\n");
+
+    QByteArray finalHash = hashFile(fileName);
+
+    fileName = "hash_" + currentDate + ".txt";
     QFile hashOutputFile(savePath.absoluteFilePath(fileName));
     if (!hashOutputFile.open(QIODevice::WriteOnly | QIODevice::Text)) return;
     QTextStream hashOutput(&hashOutputFile);
-
-    MainWindow::hashDirectory(ui->HashBackupPathInput->text(), hashOutput);
-
+    hashOutput << finalHash.toHex();
     hashOutputFile.close();
-    hashOutputFile.setPermissions(QFileDevice::ReadOwner);
-    ui->uiConsole->appendPlainText("Done hashing data");
+    qDebug("Final Hash: %s", qPrintable(finalHash.toHex()));
+    ui->uiConsole->appendPlainText("Final hash value:");
+    ui->uiConsole->appendPlainText(finalHash.toHex()+"\n");
 }
