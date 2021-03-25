@@ -146,7 +146,7 @@ void MainWindow::on_BackupButton_clicked()
 
 void MainWindow::on_HashBackupPathButton_clicked()
 {
-    QString file_name = QFileDialog::getOpenFileName(this, "Select Directory", QDir::homePath());
+    QString file_name = QFileDialog::getExistingDirectory(this, "Select Directory", QDir::homePath());
     qDebug("Hash Backup Path: %s", qPrintable(file_name));
     if(!file_name.isEmpty())
         ui->HashBackupPathInput->setText(file_name);
@@ -172,7 +172,8 @@ void MainWindow::on_HashButton_clicked()
     QDir savePath(ui->HashSavePathInput->text());
     QString currentDate = QDateTime::currentDateTime().toString("yyyy-MM-dd_hh-mm-ss");
     QString fileName = "backup_hashes_" + currentDate + ".txt";
-    QFile hashBackupOutputFile(savePath.absoluteFilePath(fileName));
+    QString filePath = savePath.absoluteFilePath(fileName);
+    QFile hashBackupOutputFile(filePath);
     if (!hashBackupOutputFile.open(QIODevice::WriteOnly | QIODevice::Text)) return;
     QTextStream hashBackupOutput(&hashBackupOutputFile);
 
@@ -181,12 +182,16 @@ void MainWindow::on_HashButton_clicked()
     hashBackupOutputFile.close();
     hashBackupOutputFile.setPermissions(QFileDevice::ReadOwner);
     qDebug("Done hashing data");
-    ui->uiConsole->appendPlainText("Done hashing data\n");
+    ui->uiConsole->appendPlainText("Done hashing data");
+    qDebug("File ouput: %s", qPrintable(filePath));
+    ui->uiConsole->appendPlainText("File ouput: " + filePath);
+    ui->uiConsole->appendPlainText("");
 
-    QByteArray finalHash = hashFile(fileName);
+    QByteArray finalHash = hashFile(filePath);
 
     fileName = "hash_" + currentDate + ".txt";
-    QFile hashOutputFile(savePath.absoluteFilePath(fileName));
+    filePath = savePath.absoluteFilePath(fileName);
+    QFile hashOutputFile(filePath);
     if (!hashOutputFile.open(QIODevice::WriteOnly | QIODevice::Text)) return;
     QTextStream hashOutput(&hashOutputFile);
     hashOutput << finalHash.toHex();
